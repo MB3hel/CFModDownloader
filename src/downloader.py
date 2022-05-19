@@ -1,9 +1,11 @@
 
+import platform
 import shutil
 import tempfile
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 import os
@@ -59,9 +61,15 @@ class ModDownloader:
             # Store original filecount (used to determine if all downloads have started)
             filecount_start = len(os.listdir(dl_path))
 
-            # Start downloads
+            # Create driver for selected browser
+            driver = self.__make_driver(dl_path)
+
+            # Start downloads (each in new tab)
             for mod in self.mods:
-                self.__download(mod, dl_path)
+                if mod == self.mods[0]:
+                    driver.execute_script("window.open('{0}/download', '_self');".format(mod))
+                else:
+                    driver.execute_script("window.open('{0}/download');".format(mod))
             
             # Wait for all downloads to of finish
             # Wait for filecount to increase by the same as the number of mods
@@ -82,9 +90,8 @@ class ModDownloader:
                         aretemp = True
                 filecount_curr = len(lst)
             
-            # Download done. Close browser windows now.
-            for driver in self.__drivers:
-                driver.close()
+            # Download done. Close browser window now.
+            driver.close()
             
             # Create destination folder if needed
             dest_path = str(Path(self.dest).absolute())
@@ -100,7 +107,7 @@ class ModDownloader:
                 shutil.copy(src, dst)
             
 
-    def __download(self, url: str, dl_path: str) -> webdriver.Remote:
+    def __make_driver(self, dl_path: str) -> webdriver.Remote:
         if self.browser == Browser.Chrome:
             # Chrome options to download files to the specified directory without prompting the user
             chrome_opts = webdriver.ChromeOptions()
@@ -110,15 +117,13 @@ class ModDownloader:
                 "download.directory_upgrade": True,
                 "safebrowsing.enabled": True
             })
-            driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
+            return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
         elif self.browser == Browser.Firefox:
             # Firefox options to download files to the specified directory without prompting the user
             firefox_opts = webdriver.FirefoxOptions()
             firefox_opts.set_preference("browser.download.folderList", 2)
             firefox_opts.set_preference("browser.download.manager.showWhenStarting", False)
             firefox_opts.set_preference("browser.download.dir", dl_path)
-            driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=firefox_opts)
+            return webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=firefox_opts)
         else:
             raise Exception("Invalid browser")
-        driver.get("{0}/download".format(url))
-        self.__drivers.append(driver)
