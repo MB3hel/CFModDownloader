@@ -9,7 +9,7 @@ Alternatively, instead of embedding a python program in such a tool (that is lik
 
 ## Why?
 
-I use Linux and Windows to play modded minecraft. I can't use the official CurseForge app on windows and am not too inclined to install unnecessary bloatware (Overwolf platform) for it on Windows. I also like the features of various third party launchers. The new CF API has limited the use of those tools. This is one way to work around those limitations.
+I use Linux and Windows to play modded minecraft. I can't use the official CurseForge app on Linux and am not too inclined to install unnecessary bloatware (Overwolf platform) for it on Windows. I also like the features of various third party launchers. The new CF API has limited the use of those tools. This is one way to work around those limitations.
 
 
 ## License
