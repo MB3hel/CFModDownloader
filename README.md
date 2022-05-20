@@ -2,9 +2,11 @@
 
 ## About
 
-CurseForge mod downloader. This program can "automate" downloading of Minecraft mods from CurseForge using a web browser (chrome of firefox). This requires the url of the mod and the file id for the specific version. This information can be obtained either from navigating the CurseForge site or from a modpack manifest file. If using a modpack manifest file, you are provided with both the mod ID and file ID. The mod ID can be used to get the url using the CF API's "get mod" (requires you have a CF API Key). The intent of this project is to allow third party tools that have such an API key to download mods that may not allow third party downloads. Such a tool would need to create a list of mod urls and file versions from the modpack json (or from any other source) and pass it to this program when calling it. 
+CurseForge mod downloader. This program can "automate" downloading of Minecraft mods from CurseForge using a web browser (chrome of firefox). This requires the url of the mod and the file id for the specific version. This information can be obtained either from navigating the CurseForge site or from a modpack manifest file. If using a modpack manifest file, you are provided with both the mod ID and file ID. The mod ID can be used to get the url using the CF API's "get mod" (requires you have a CF API Key&ast;). The intent of this project is to allow third party tools that have such an API key to download mods that may not allow third party downloads. Such a tool would need to create a list of mod urls and file versions from the modpack json (or from any other source) and pass it to this program when calling it. 
 
-Alternatively, instead of embedding a python program in such a tool (that is likely not written in python) there are other language bindings for the `selenium` library that can be used. If instead you would rather embed or download this python program (or pyinstaller binaries) that also works.
+&ast;I think this part of the API still works for mods that disable third party usage, but I haven't actually confirmed this...
+
+Instead of embedding a python program in such a tool (that is likely not written in python) there are other language bindings for the `selenium` library that can be used. If instead you would rather embed or download this python program (or pyinstaller binaries) that also works.
 
 
 ## Why?
