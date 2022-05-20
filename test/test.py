@@ -1,13 +1,13 @@
 
-from downloader import Browser, ModDownloader, Mod
-import downloader
+from src.downloader import Browser, ModDownloader, Mod
+from src import downloader
 import os
 
 if __name__ == "__main__":
     dl = ModDownloader(Browser.Chrome)
     dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/many-materials/")
     dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/mob-opacity/")
-    dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/powah")
+    dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/powah", "2915770")
     dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/jei")
     dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/journeymap")
     dl.add_mod("https://www.curseforge.com/minecraft/mc-mods/clumps")

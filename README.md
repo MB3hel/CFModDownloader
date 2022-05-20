@@ -13,4 +13,4 @@ source ./env/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-The `simple_test.py` script is used for during development testing.
+The `test` folder contains development testing scripts.
