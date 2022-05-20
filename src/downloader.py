@@ -76,10 +76,9 @@ class ModDownloader:
             for mod in self.mods:
                 print("Starting download {0} of {1}...".format(count, len(self.mods)))
                 count = count + 1
-                if mod == self.mods[0]:
-                    driver.execute_script("window.open('{0}/download/{1}', '_self');".format(mod.base_url, mod.file_id))
-                else:
-                    driver.execute_script("window.open('{0}/download/{1}');".format(mod.base_url, mod.file_id))
+                if mod != self.mods[0]:
+                    driver.switch_to.new_window('tab')
+                driver.execute_script("window.open('{0}/download/{1}', '_self');".format(mod.base_url, mod.file_id))
             
             # Wait for all downloads finish
             # Wait for filecount to increase by the same as the number of mods (excluding temp files)
