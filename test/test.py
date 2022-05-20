@@ -1,7 +1,6 @@
 
-from src.downloader import Browser, ModDownloader, Mod
-from src import downloader
-import os
+from src.downloader import Browser, ModDownloader
+
 
 if __name__ == "__main__":
     dl = ModDownloader(Browser.Chrome)

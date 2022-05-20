@@ -25,6 +25,7 @@ class Browser(Enum):
     Chrome = auto()
     Firefox = auto()
 
+
 class Mod:
     def __init__(self, base_url: str, file_id: str):
         self.base_url = base_url
