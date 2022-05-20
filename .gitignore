@@ -1,4 +1,6 @@
 mods/
+modpack.zip
+modfile_modpack.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

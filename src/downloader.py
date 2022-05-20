@@ -70,7 +70,7 @@ class ModDownloader:
     def __init__(self, browser: Browser = Browser.Chrome, dest = "./mods", mods = []):
         self.browser: Browser = browser
         self.dest: str = dest
-        self.mods: List[Mod] = []
+        self.mods: List[Mod] = mods
         self.max_tabs = 0
     
     ## Add a mod to be downloaded using its url

@@ -1,3 +1,5 @@
 selenium
 webdriver_manager
 pyinstaller
+requests
+beautifulsoup4

@@ -7,7 +7,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: sudo apt-get install python3-setuptools python3-wheel
       - run: python3 -m pip install -r requirements.txt
-      - run: pyinstaller ./src/main.py --onefile --name cfmdown
+      - run: pyinstaller ./src/cfmdown.py --onefile --name cfmdown
+      - run: pyinstaller ./src/cfmparse.py --onefile --name cfmparse
       - uses: actions/upload-artifact@v2
         with:
           name: dist
