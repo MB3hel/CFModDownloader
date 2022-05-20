@@ -14,7 +14,7 @@ I use Linux and Windows to play modded minecraft. I can't use the official Curse
 
 ## License
 
-MIT License (see LICENSE file for details)
+BSD 3 Clause (see LICENSE file for details)
 
 
 ## Demo usage
