@@ -32,7 +32,6 @@ import platform
 from re import L
 import shutil
 import tempfile
-import threading
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -66,61 +65,59 @@ class ModParser:
     def __init__(self, urls, browser: Browser = Browser.Chrome):
         self.browser: Browser = browser
         self.urls: List[str] = urls
-        self.num_threads = 4
-        self.parse_lock = threading.Lock()      # used as much to synch prints as anything else
-        self.parse_count = 0
-        self.thread_results = []
-        self.parse_urls = []
+        self.num_tabs = 4
     
 
     ## Parse the URLs pages to find project IDs. Returns map of ID: url
     def parse(self) -> Dict[int, str]:
-        # Start self.num_threads threads each managing its own browse window
-        self.thread_results.clear()
-        threads: List[threading.Thread] = []
-        drivers: List[webdriver.Remote] = []
-        self.parse_urls = self.urls.copy()
-        for i in range(self.num_threads):
-            d = self.__make_driver()
-            t = threading.Thread(daemon=True, target=self.__thread_parse, args=(d,))
-            t.start()
-            threads.append(t)
-            drivers.append(d)
+        # Create driver for selected browser
+        print("Launching browser...")
+        driver = self.__make_driver()
 
-        # Wait for all threads to finish & close browsers when done
-        for i in range(self.num_threads):
-            threads[i].join()
-            drivers[i].quit()
-        
-        # Collect results into one dict
-        data = {}
-        for i in range(self.num_threads):
-            data.update(self.thread_results[i])
-
-        print("Done obtaining IDs.")
-
-        return data
-
-    def __thread_parse(self, driver: webdriver.Remote):
         data: Dict[int, str] = {}
-        while True:        
-            # Load and parse each page
-            with self.parse_lock:
-                if len(self.parse_urls) == 0:
-                    break
-                url = self.parse_urls.pop()
-                print("Obtaining ID {0} of {1}...".format(self.parse_count, len(self.urls)))
-                self.parse_count = self.parse_count + 1
-            driver.get(url)
-            soup = BeautifulSoup(driver.page_source)
-            for span in soup.find_all("span"):
-                if span.text.lower() == "project id":
-                    sibling = span.find_next_sibling("span")
+        parse_urls = self.urls.copy()
+
+        count = 1
+        while True:
+            # Open new tab if fewer than max (and more urls to parse)
+            while len(driver.window_handles) < self.num_tabs + 1 and len(parse_urls) > 0:
+                # Open a new tab loading the next url
+                print("Obtaining ID for mod {0} of {1}...".format(count, len(self.urls)))
+                count = count + 1
+                driver.switch_to.window(driver.window_handles[0])
+                driver.switch_to.new_window("tab")
+                time.sleep(0.01)
+                driver.execute_script("window.open('{0}', '_self');".format(parse_urls.pop()))
+
+            # Only the "keepalive" tab remains and no more parse urls. Done parsing
+            if len(driver.window_handles) == 1 and len(parse_urls) == 0:
+                break
+
+            # For all tabs, check if loading done. If so parse and close the tab
+            # Ignore first tab. It just sits empty to ensure the browser does not close
+            for win in driver.window_handles[1:]:
+                # Select correct tab
+                driver.switch_to.window(win)
+
+                # Page is considered loaded when text "Project ID" is found
+                if driver.page_source.find("Project ID") != -1:
                     try:
-                        data[int(sibling.text)] = url
+                        soup = BeautifulSoup(driver.page_source, "lxml")
+                        label_tag = soup.find("span", text="Project ID")
+                        id_tag = label_tag.find_next_sibling("span")
+                        data[int(id_tag.text)] = driver.current_url
                     except:
-                        data[-1] = url
-        self.thread_results.append(data)
+                        print("Failed to obtain Project ID for {0}".format(driver.current_url))
+                        data[-1] = driver.current_url
+                    driver.close()
+
+            # Avoid excessive CPU usage
+            time.sleep(0.05)
+                        
+        print("Closing browser...")
+        driver.quit()
+        print("Done obtaining IDs.")
+        return data
 
     def __make_driver(self) -> webdriver.Remote:
         if self.browser == Browser.Chrome:

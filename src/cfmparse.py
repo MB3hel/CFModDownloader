@@ -34,13 +34,13 @@ import zipfile
 import json
 import os
 from bs4 import BeautifulSoup
-from myparser import ModParser, Browser
+from mpparser import ModParser, Browser
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Uses a browser to create a list of mod URLs for a CurseForge modpack zip.")
     parser.add_argument("-b", dest="browser", type=str, default="chrome", choices=["chrome", "firefox"], help="Specify which browser to use to download mods")
-    parser.add_argument("-t", metavar="windows", dest="windows", type=int, default=4, help="Number of browser windows to use for project id resolution. Number of concurrent resolutions.")
+    parser.add_argument("-t", metavar="tabs", dest="tabs", type=int, default=4, help="Number of browser tabs to use for project id resolution. Number of concurrent resolutions.")
     parser.add_argument("modpack", type=str, help="Path to downloaded modpack zip file.")
     args = parser.parse_args()
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
         print("Reading modlist...")
         try:
             with open(os.path.join(tempdir, "modlist.html"), "r") as modlist_file:
-                soup = BeautifulSoup(modlist_file.read())
+                soup = BeautifulSoup(modlist_file.read(), "lxml")
                 for a in soup.find_all('a'):
                     url_lst.append(a.get("href"))
         except:
@@ -105,8 +105,12 @@ if __name__ == "__main__":
     
     # Visit each url in a browser and get the project ID (= modID) associated with the URL
     print("Parsing mod pages to find mod IDs...")
-    p = ModParser(url_lst, browser)
-    p.num_threads = args.windows
+    try:
+        p = ModParser(url_lst, browser)
+    except:
+        print("Failed to parse one or more mod pages!")
+        exit(1)
+    p.num_tabs = args.tabs
     url_map = p.parse()
     if -1 in url_map.keys():
         print("Failed to parse one or more mod pages!")

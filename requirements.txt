@@ -3,3 +3,4 @@ webdriver_manager
 pyinstaller
 requests
 beautifulsoup4
+lxml

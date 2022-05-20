@@ -13,11 +13,11 @@ Instead of embedding a python program in such a tool (that is likely not written
 # Specify file to load modlist from with -f (can specify multiple)
 # Specify mods on command line with -m
 # Specify destination with -d
-# Specify max parallel downloads with -t (0 for unlimited)
+# Specify max parallel downloads with -t (0 for unlimited). Default is 12
 # Mods are specified in format of url:file_id
 # Modpacks provide mod_id and file_id
 # To get url from mod_id you need an api key and the url can be obtained by "getting the mod" using the CF API
-python3 src/main.py -f modfile.txt -f modfile2.txt -m "https://www.curseforge.com/minecraft/mc-mods/waystones:3515707" -b firefox -d mods -t 0
+cfmdown -f modfile.txt -f modfile2.txt -m "https://www.curseforge.com/minecraft/mc-mods/waystones:3515707" -b firefox -d mods -t 0
 ```
 
 Pyinstaller executables are also provided under releases and can be used instead of `python3 src/main.py`.
@@ -25,12 +25,23 @@ Pyinstaller executables are also provided under releases and can be used instead
 
 ## About `cfmparse`
 
-This tool parses a CurseForge modpack zip file to determine base url and file id for all mods included *without using the CurseForge API*. This is a slower alternative to using the CF API to generate urls for mods. This program outputs a file that can be used by `cfmdown` to download the mods in a pack.
+Curseforge Modpack Parser. This tool parses a CurseForge modpack zip file to determine base url and file id for all mods included *without using the CurseForge API*. Instead, a browser is used to navigate to each mod's page and search for its project id. This is a slower alternative to using the CF API to generate urls for mods. This program outputs a file that can be used by `cfmdown` to download the mods in a pack.
+
+*Note: using firefox with this script instead of chrome is highly recommended as it seems to finish much faster*
 
 **Demo Usage:**
 
 ```sh
-# TODO
+# Use -b to select browser (chrome / firefox)
+# Note: firefox is much faster for this script
+# Use -t to specity number of browser tabs used
+# Only positional argument is path to modpack zip downloaded from CF
+# modfile_modpack.txt will be written next to modpack.zip
+# If modpack name is <name>.zip output will be modfile_<name>.txt
+cfmparse -b firefox -t 4 modpack.zip
+
+# The resultant file can be used by cfmdown to download mods
+cfmdown -b firefox -t 12 -d mods -f modfile_modpack.txt
 ```
 
 
