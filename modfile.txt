@@ -1,0 +1,25 @@
+# Notice colons at end of url before file_id
+# If no file_id provided ("default" version of the mod) line ends with colon
+# Also, lines starting with a hash are comments
+https://www.curseforge.com/minecraft/mc-mods/many-materials/:
+https://www.curseforge.com/minecraft/mc-mods/mob-opacity/:
+https://www.curseforge.com/minecraft/mc-mods/powah:2915770
+https://www.curseforge.com/minecraft/mc-mods/jei:
+https://www.curseforge.com/minecraft/mc-mods/journeymap:
+https://www.curseforge.com/minecraft/mc-mods/clumps:
+https://www.curseforge.com/minecraft/mc-mods/bookshelf:
+https://www.curseforge.com/minecraft/mc-mods/natures-compass:
+https://www.curseforge.com/minecraft/mc-mods/quark:
+https://www.curseforge.com/minecraft/mc-mods/patchouli:
+https://www.curseforge.com/minecraft/mc-mods/crafttweaker:
+https://www.curseforge.com/minecraft/mc-mods/enchantment-descriptions:
+https://www.curseforge.com/minecraft/mc-mods/storage-drawers:
+https://www.curseforge.com/minecraft/mc-mods/just-enough-resources-jer:
+https://www.curseforge.com/minecraft/mc-mods/ctm:
+https://www.curseforge.com/minecraft/mc-mods/iron-chests:
+https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty:
+https://www.curseforge.com/minecraft/mc-mods/tinkers-construct:
+https://www.curseforge.com/minecraft/mc-mods/curios:
+https://www.curseforge.com/minecraft/mc-mods/geckolib:
+https://www.curseforge.com/minecraft/mc-mods/chisel:
+https://www.curseforge.com/minecraft/mc-mods/architectury-api:

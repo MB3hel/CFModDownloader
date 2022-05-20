@@ -18,9 +18,6 @@ import time
 from enum import Enum, auto
 
 
-API_KEY = ""
-
-
 class Browser(Enum):
     Chrome = auto()
     Firefox = auto()
@@ -126,7 +123,7 @@ class ModDownloader:
             print("Preparing to copy to destination folder...")
             dest_path = str(Path(self.dest).absolute())
             if not os.path.exists(dest_path):
-                os.mkdir(dest_path)
+                os.makedirs(dest_path)
             
             # Copy downloaded files to destination folder (overwriting existing)
             count = 1
@@ -139,6 +136,7 @@ class ModDownloader:
                 if os.path.exists(dst):
                     os.remove(dst)
                 shutil.copy(src, dst)
+        print("Done downloading mods.")
             
 
     def __make_driver(self, dl_path: str) -> webdriver.Remote:
