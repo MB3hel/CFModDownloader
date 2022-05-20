@@ -71,12 +71,13 @@ class ModDownloader:
         self.browser: Browser = browser
         self.dest: str = dest
         self.mods: List[Mod] = []
+        self.max_tabs = 0
     
     ## Add a mod to be downloaded using its url
     #  @param url CurseForge url to the mod to download
     def add_mod(self, url: str, file_id: str = ""):
         self.mods.append(Mod(url, file_id))
-    
+
     ## Download the configured mods using the configured browser and destination folder
     #  This will open multiple browser windows, which will close automatically when done
     #  downloading. This function will not return until downloading is done
@@ -90,63 +91,73 @@ class ModDownloader:
             if dl_path[1] == ":":
                 dl_path = dl_path[0].capitalize() + dl_path[1:]
 
-            # Store original filecount (used to determine if all downloads have started)
-            filecount_start = len(os.listdir(dl_path))
-
             # Create driver for selected browser
             print("Launching browser...")
             driver = self.__make_driver(dl_path)
 
-            # Start downloads (each in new tab)
+            # For each set of mods (up to self.max_tabs mods per set)
             count = 1
-            for mod in self.mods:
-                print("Starting download {0} of {1}...".format(count, len(self.mods)))
-                count = count + 1
-                if mod != self.mods[0]:
-                    driver.switch_to.new_window('tab')
-                driver.execute_script("window.open('{0}/download/{1}', '_self');".format(mod.base_url, mod.file_id))
-            
-            # Wait for all downloads finish
-            # Wait for filecount to increase by the same as the number of mods (excluding temp files)
-            # and for there to be no temp files (temp = used by browser during download)
-            # "While there are temp files or the filecount is too small"
-            print("Waiting for all downloads to finish...")
-            filecount_curr = filecount_start
-            while filecount_curr < filecount_start + len(self.mods):
-                time.sleep(1)
-                lst = os.listdir(dl_path)
-                lst_notemp = []
-                for l in lst:
-                    if l.endswith(".crdownload"):
-                        # Chrome temp file
-                        continue
-                    if l.endswith(".part"):
-                        # Firefox temp file
-                        continue
-                    lst_notemp.append(l)
-                filecount_curr = len(lst_notemp)
+            for mods in self.__split_mods_list():
+                # Store original filecount (used to determine if all downloads have started)
+                filecount_start = len(os.listdir(dl_path))
+                
+                # Start downloads (each in new tab)
+                for mod in mods:
+                    print("Starting download {0} of {1}...".format(count, len(self.mods)))
+                    count = count + 1
+                    if mod != mods[0]:
+                        driver.switch_to.new_window('tab')
+                    driver.execute_script("window.open('{0}/download/{1}', '_self');".format(mod.base_url, mod.file_id))
+                
+                # Wait for all downloads finish
+                # Wait for filecount to increase by the same as the number of mods (excluding temp files)
+                # and for there to be no temp files (temp = used by browser during download)
+                # "While there are temp files or the filecount is too small"
+                print("Waiting for all downloads to finish...")
+                filecount_curr = filecount_start
+                while filecount_curr < filecount_start + len(mods):
+                    time.sleep(1)
+                    lst = os.listdir(dl_path)
+                    lst_notemp = []
+                    for l in lst:
+                        if l.endswith(".crdownload"):
+                            # Chrome temp file
+                            continue
+                        if l.endswith(".part"):
+                            # Firefox temp file
+                            continue
+                        lst_notemp.append(l)
+                    filecount_curr = len(lst_notemp)
 
-            # Even if enough non-temp files exist, the browser may still be copying to the new file
-            # Do not continue until all temp files have been deleted by the browser
-            print("Waiting for browser to finish...")
-            done = False
-            while not done:
-                time.sleep(1)
-                done = True
-                for file in os.listdir(dl_path):
-                    if file.endswith(".crdownload"):
-                        # Chrome temp file
-                        done = False
-                        break
-                    if file.endswith(".part"):
-                        # Firefox temp file
-                        done = False
-                        break
+                # Even if enough non-temp files exist, the browser may still be copying to the new file
+                # Do not continue until all temp files have been deleted by the browser
+                print("Waiting for browser to finish...")
+                done = False
+                while not done:
+                    time.sleep(1)
+                    done = True
+                    for file in os.listdir(dl_path):
+                        if file.endswith(".crdownload"):
+                            # Chrome temp file
+                            done = False
+                            break
+                        if file.endswith(".part"):
+                            # Firefox temp file
+                            done = False
+                            break
+                
+                # Close all but one tab so browser is ready for next set of mods
+                for win in driver.window_handles[1:]:
+                    driver.switch_to.window(win)
+                    driver.close()
+                
+                # Switch to one remaining tab
+                driver.switch_to.window(driver.window_handles[0])
 
-            # Download done. Close browser window now.
+            # Downloads all done. Close browser window now.
             print("Closing browser...")
             driver.quit()
-            
+
             # Create destination folder if needed
             print("Preparing to copy to destination folder...")
             dest_path = str(Path(self.dest).absolute())
@@ -165,7 +176,18 @@ class ModDownloader:
                     os.remove(dst)
                 shutil.copy(src, dst)
         print("Done downloading mods.")
-            
+    
+    ## Split self.mods into chunks of size self.max_tabs
+    def __split_mods_list(self) -> List[List[Mod]]:
+        # max_tabs == 0 means no limit
+        if self.max_tabs == 0:
+            return [self.mods.copy()]
+        else:
+            # Split into lists of size self.max_tabs
+            result = []
+            for i in range(0, len(self.mods), self.max_tabs):
+                result.append(self.mods[i:i+self.max_tabs])
+            return result
 
     def __make_driver(self, dl_path: str) -> webdriver.Remote:
         if self.browser == Browser.Chrome:

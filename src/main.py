@@ -51,6 +51,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", dest="dest", default="./mods", type=str, metavar="destination", help="Destination folder to download mods to. Will be created it it does not exist.")
     parser.add_argument("-m", dest="mods", metavar="mod", default=[], action="append", type=str, help="Download a given mod in the form url:file_id")
     parser.add_argument("-f", dest="files", metavar="file", default=[], action="append", type=str, help="Download mods listed in the given file in the form url:file_id")
+    parser.add_argument("-t", dest="tabs", metavar="tabs", default=0, type=int, help="Maximum number of tabs (concurrent mod downloads) at a time. 0 for unlimited. Default 0")
     args = parser.parse_args()
     if len(args.mods) == 0 and len(args.files) == 0:
         parser.error("No mods provided. Use either -m or -f when invoking.")
@@ -62,6 +63,7 @@ if __name__ == "__main__":
         browser = Browser.Firefox
 
     dl = ModDownloader(browser, args.dest)
+    dl.max_tabs = args.tabs
 
     for mod in args.mods:
         url, file_id = parse_mod(mod)
