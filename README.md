@@ -15,6 +15,7 @@ python3 src/main.py -f modfile.txt -f modfile2.txt -m "https://www.curseforge.co
 
 Pyinstaller executables are also provided under releases.
 
+
 ## Dev Setup
 
 ```sh
@@ -29,3 +30,24 @@ python -m pip install -r requirements.txt
 ```
 
 The `test` folder contains development testing scripts.
+
+
+## Building Executables
+
+**Windows:**
+
+```sh
+pyinstaller .\src\main.py --onefile --name cfmdown
+```
+
+**macOS:**
+
+```sh
+pyinstaller ./src/main.py --onefile --name cfmdown
+```
+
+**Linux:**
+
+```sh
+pyinstaller ./src/main.py --onefile --name cfmdown
+```
