@@ -19,8 +19,6 @@ CurseForge mod downloader. This program can "automate" downloading of Minecraft 
 cfmdown -f modfile.txt -f modfile2.txt -m "https://www.curseforge.com/minecraft/mc-mods/waystones:3515707" -b firefox -d mods -t 0
 ```
 
-Pyinstaller executables are also provided under releases and can be used instead of `python3 src/main.py`.
-
 
 ## About `cfmparse`
 
