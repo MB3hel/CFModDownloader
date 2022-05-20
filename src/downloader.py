@@ -1,5 +1,7 @@
 
+from email.mime import base
 import platform
+from re import L
 import shutil
 import tempfile
 from selenium import webdriver
@@ -16,9 +18,17 @@ import time
 from enum import Enum, auto
 
 
+API_KEY = ""
+
+
 class Browser(Enum):
     Chrome = auto()
     Firefox = auto()
+
+class Mod:
+    def __init__(self, base_url: str, file_id: str):
+        self.base_url = base_url
+        self.file_id = file_id    
 
 
 ## Downloader to download Minecraft Mods from CurseForge given the URL to the CurseForge page for the mod
@@ -34,23 +44,19 @@ class ModDownloader:
     def __init__(self, browser: Browser = Browser.Chrome, dest = "./mods", mods = []):
         self.browser: Browser = browser
         self.dest: str = dest
-        self.mods: List[str] = []
-        self.__drivers: List[webdriver.Remote] = []
+        self.mods: List[Mod] = []
     
     ## Add a mod to be downloaded using its url
     #  @param url CurseForge url to the mod to download
-    def add_mod(self, url: str):
-        if not url in self.mods:
-            self.mods.append(url)
+    def add_mod(self, url: str, file_id: str = ""):
+        self.mods.append(Mod(url, file_id))
     
     ## Download the configured mods using the configured browser and destination folder
     #  This will open multiple browser windows, which will close automatically when done
     #  downloading. This function will not return until downloading is done
     def download(self):
-        # Clear old state
-        self.__drivers.clear()
-
         # Create temp dir to store downloaded files in
+        print("Creating temp download directory...")
         with tempfile.TemporaryDirectory() as tempdir:
             # Construct properly formatted download path for use with browser options
             # Chrome on windows requires backslash and capitalized drive letter
@@ -62,44 +68,72 @@ class ModDownloader:
             filecount_start = len(os.listdir(dl_path))
 
             # Create driver for selected browser
+            print("Launching browser...")
             driver = self.__make_driver(dl_path)
 
             # Start downloads (each in new tab)
+            count = 1
             for mod in self.mods:
+                print("Starting download {0} of {1}...".format(count, len(self.mods)))
+                count = count + 1
                 if mod == self.mods[0]:
-                    driver.execute_script("window.open('{0}/download', '_self');".format(mod))
+                    driver.execute_script("window.open('{0}/download/{1}', '_self');".format(mod.base_url, mod.file_id))
                 else:
-                    driver.execute_script("window.open('{0}/download');".format(mod))
+                    driver.execute_script("window.open('{0}/download/{1}');".format(mod.base_url, mod.file_id))
             
-            # Wait for all downloads to of finish
-            # Wait for filecount to increase by the same as the number of mods
+            # Wait for all downloads finish
+            # Wait for filecount to increase by the same as the number of mods (excluding temp files)
             # and for there to be no temp files (temp = used by browser during download)
             # "While there are temp files or the filecount is too small"
+            print("Waiting for all downloads to finish...")
             filecount_curr = filecount_start
-            aretemp = True
-            while aretemp or (filecount_curr < filecount_start + len(self.mods)):
+            while filecount_curr < filecount_start + len(self.mods):
                 time.sleep(1)
                 lst = os.listdir(dl_path)
-                aretemp = False
+                lst_notemp = []
                 for l in lst:
-                    if l.endswith(".crwodnwload"):
-                        # Chrome
-                        aretemp = True
+                    if l.endswith(".crdownload"):
+                        # Chrome temp file
+                        continue
                     if l.endswith(".part"):
-                        # Firefox
-                        aretemp = True
-                filecount_curr = len(lst)
-            
+                        # Firefox temp file
+                        continue
+                    lst_notemp.append(l)
+                filecount_curr = len(lst_notemp)
+
+            # Even if enough non-temp files exist, the browser may still be copying to the new file
+            # Do not continue until all temp files have been deleted by the browser
+            print("Waiting for browser to finish...")
+            done = False
+            while not done:
+                time.sleep(1)
+                done = True
+                for file in os.listdir(dl_path):
+                    if file.endswith(".crdownload"):
+                        # Chrome temp file
+                        done = False
+                        break
+                    if file.endswith(".part"):
+                        # Firefox temp file
+                        done = False
+                        break
+
             # Download done. Close browser window now.
-            driver.close()
+            print("Closing browser...")
+            driver.quit()
             
             # Create destination folder if needed
+            print("Preparing to copy to destination folder...")
             dest_path = str(Path(self.dest).absolute())
             if not os.path.exists(dest_path):
                 os.mkdir(dest_path)
             
             # Copy downloaded files to destination folder (overwriting existing)
-            for file in os.listdir(tempdir):
+            count = 1
+            files = os.listdir(tempdir)
+            for file in files:
+                print("Copying file {0} of {1}".format(count, len(files)))
+                count = count + 1
                 src = os.path.join(tempdir, file)
                 dst = os.path.join(dest_path, file)
                 if os.path.exists(dst):
@@ -117,6 +151,7 @@ class ModDownloader:
                 "download.directory_upgrade": True,
                 "safebrowsing.enabled": True
             })
+            chrome_opts.add_argument("--safebrowsing-disable-download-protection")
             return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
         elif self.browser == Browser.Firefox:
             # Firefox options to download files to the specified directory without prompting the user
