@@ -94,6 +94,7 @@ class ModDownloader:
             # Create driver for selected browser
             print("Launching browser...")
             driver = self.__make_driver(dl_path)
+            driver.minimize_window()
 
             # For each set of mods (up to self.max_tabs mods per set)
             count = 1
