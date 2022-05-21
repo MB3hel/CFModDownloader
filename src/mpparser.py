@@ -73,7 +73,6 @@ class ModParser:
         # Create driver for selected browser
         print("Launching browser...")
         driver = self.__make_driver()
-        driver.minimize_window()
 
         data: Dict[int, str] = {}
         parse_urls = self.urls.copy()
