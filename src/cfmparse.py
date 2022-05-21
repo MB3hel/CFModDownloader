@@ -92,8 +92,8 @@ if __name__ == "__main__":
         # Read modlist html to construct list of urls
         print("Reading modlist...")
         try:
-            with open(os.path.join(tempdir, "modlist.html"), "r") as modlist_file:
-                soup = BeautifulSoup(modlist_file.read(), "lxml")
+            with open(os.path.join(tempdir, "modlist.html"), "rb") as modlist_file:
+                soup = BeautifulSoup(modlist_file.read().decode('utf-8'), "lxml")
                 for a in soup.find_all('a'):
                     url_lst.append(a.get("href"))
         except:

@@ -100,16 +100,19 @@ class ModParser:
                 driver.switch_to.window(win)
 
                 # Page is considered loaded when text "Project ID" is found
-                if driver.page_source.find("Project ID") != -1:
-                    try:
-                        soup = BeautifulSoup(driver.page_source, "lxml")
-                        label_tag = soup.find("span", text="Project ID")
-                        id_tag = label_tag.find_next_sibling("span")
-                        data[int(id_tag.text)] = driver.current_url
-                    except:
-                        print("Failed to obtain Project ID for {0}".format(driver.current_url))
-                        data[-1] = driver.current_url
-                    driver.close()
+                try:
+                    if driver.page_source.find("Project ID") != -1:
+                        try:
+                            soup = BeautifulSoup(driver.page_source, "lxml")
+                            label_tag = soup.find("span", text="Project ID")
+                            id_tag = label_tag.find_next_sibling("span")
+                            data[int(id_tag.text)] = driver.current_url
+                        except:
+                            print("Failed to obtain Project ID for {0}".format(driver.current_url))
+                            data[-1] = driver.current_url
+                        driver.close()
+                except:
+                    print("Exception occurred checking if page ready. If you see this once, it's probably fine. If this keeps repeating, script has crashed.")
 
             # Avoid excessive CPU usage
             time.sleep(0.05)
