@@ -4,6 +4,8 @@
 
 CurseForge mod downloader. This program can "automate" downloading of Minecraft mods from CurseForge using a web browser (chrome of firefox). This requires the url of the mod and the file id for the specific version. This information can be obtained either from navigating the CurseForge site or from a modpack manifest file. If using a modpack manifest file, you are provided with both the mod ID and file ID. The mod ID can be used to get the url using the CF API's "get mod" (requires you have a CF API Key). The intent of this project is to allow third party tools that have such an API key to download mods that may not allow third party downloads. Such a tool would need to create a list of mod urls and file versions from the modpack json (or from any other source) and pass it to this program when calling it. 
 
+***Note: This is not a "one-click" solution to download a modpack. This is a set of tools that could be used to build such a solution. A GUI tool using these tools is available [here](https://github.com/MB3hel/CFModpackImporter/). It is not one-click, but provides data that can be manually added to a modded instance. This is likely more suitable for most users.***
+
 
 **Demo usage:**
 
