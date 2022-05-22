@@ -7,8 +7,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: python3 -m pip install setuptools wheel
       - run: python3 -m pip install -r requirements.txt
-      - run: pyinstaller ./src/cfmdown.py --onefile --name cfmdown
-      - run: pyinstaller ./src/cfmparse.py --onefile --name cfmparse
+      - run: pyinstaller ./src/cfmdown.py --onefile --name cfmdown --python-option u
+      - run: pyinstaller ./src/cfmparse.py --onefile --name cfmparse --python-option u
       - uses: actions/upload-artifact@v2
         with:
           name: dist

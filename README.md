@@ -73,20 +73,20 @@ The `test` folder contains development testing scripts.
 **Windows:**
 
 ```sh
-pyinstaller .\src\cfmdown.py --onefile --name cfmdown
-pyinstaller .\src\cfmparse.py --onefile --name cfmparse
+pyinstaller .\src\cfmdown.py --onefile --name cfmdown --python-option u
+pyinstaller .\src\cfmparse.py --onefile --name cfmparse --python-option u
 ```
 
 **macOS:**
 
 ```sh
-pyinstaller ./src/cfmdown.py --onefile --name cfmdown
-pyinstaller ./src/cfmparse.py --onefile --name cfmparse
+pyinstaller ./src/cfmdown.py --onefile --name cfmdown --python-option u
+pyinstaller ./src/cfmparse.py --onefile --name cfmparse --python-option u
 ```
 
 **Linux:**
 
 ```sh
-pyinstaller ./src/cfmdown.py --onefile --name cfmdown
-pyinstaller ./src/cfmparse.py --onefile --name cfmparse
+pyinstaller ./src/cfmdown.py --onefile --name cfmdown --python-option u
+pyinstaller ./src/cfmparse.py --onefile --name cfmparse --python-option u
 ```
