@@ -42,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("-b", dest="browser", type=str, default="chrome", choices=["chrome", "firefox"], help="Specify which browser to use to download mods")
     parser.add_argument("-t", metavar="tabs", dest="tabs", type=int, default=4, help="Number of browser tabs to use for project id resolution. Number of concurrent resolutions.")
     parser.add_argument("modpack", type=str, help="Path to downloaded modpack zip file.")
+    parser.add_argument("-n", dest="headless", action='store_true', help="Launch the browser in headless mode (do not show the browser). Only works with firefox.")
     args = parser.parse_args()
 
     browser = None
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     # Visit each url in a browser and get the project ID (= modID) associated with the URL
     print("Parsing mod pages to find mod IDs...")
     try:
-        p = ModParser(url_lst, browser)
+        p = ModParser(url_lst, browser, args.headless)
     except:
         print("Failed to parse one or more mod pages!")
         exit(1)

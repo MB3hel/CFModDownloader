@@ -67,8 +67,9 @@ class ModDownloader:
     #  @param browser Specify which browser to download mods with
     #  @param dest Specify destination folder to download mods into
     #  @param mods Specify a set of urls for mods to download
-    def __init__(self, browser: Browser = Browser.Chrome, dest = "./mods", mods = []):
+    def __init__(self, browser: Browser = Browser.Chrome, headless: bool = False, dest = "./mods", mods = []):
         self.browser: Browser = browser
+        self.headless = headless
         self.dest: str = dest
         self.mods: List[Mod] = mods
         self.max_tabs = 0
@@ -94,7 +95,7 @@ class ModDownloader:
 
             # Create driver for selected browser
             print("Launching browser...")
-            driver = self.__make_driver(dl_path, True)
+            driver = self.__make_driver(dl_path, self.headless)
 
             # For each set of mods (up to self.max_tabs mods per set)
             count = 1

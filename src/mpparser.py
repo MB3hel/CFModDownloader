@@ -62,8 +62,9 @@ class ModParser:
     ## Create parser.
     #  @param urls Specify a set of urls for mods to download
     #  @param browser Specify which browser to download mods with
-    def __init__(self, urls, browser: Browser = Browser.Chrome):
+    def __init__(self, urls, browser: Browser = Browser.Chrome, headless: bool = False):
         self.browser: Browser = browser
+        self.headless = headless
         self.urls: List[str] = urls
         self.num_tabs = 4
     
@@ -72,7 +73,7 @@ class ModParser:
     def parse(self) -> Dict[int, str]:
         # Create driver for selected browser
         print("Launching browser...")
-        driver = self.__make_driver()
+        driver = self.__make_driver(self.headless)
 
         data: Dict[int, str] = {}
         parse_urls = self.urls.copy()
@@ -122,10 +123,16 @@ class ModParser:
         print("Done obtaining IDs.")
         return data
 
-    def __make_driver(self) -> webdriver.Remote:
+    def __make_driver(self, headless: bool) -> webdriver.Remote:
         if self.browser == Browser.Chrome:
+            if headless:
+                print("WARNING: ********************************************************************")
+                print("WARNING: NOT USING HEADLESS MODE WITH CHROME AS IT PREVENTS FILE DOWNLOADS!!!")
+                print("WARNING: ********************************************************************")
             return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
         elif self.browser == Browser.Firefox:
-            return webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
+            firefox_opts = webdriver.FirefoxOptions()
+            firefox_opts.headless = headless
+            return webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=firefox_opts)
         else:
             raise Exception("Invalid browser")

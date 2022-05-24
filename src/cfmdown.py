@@ -63,7 +63,7 @@ if __name__ == "__main__":
     elif args.browser == "firefox":
         browser = Browser.Firefox
 
-    dl = ModDownloader(browser, args.dest)
+    dl = ModDownloader(browser, args.headless, args.dest)
     dl.max_tabs = args.tabs
 
     for mod in args.mods:
