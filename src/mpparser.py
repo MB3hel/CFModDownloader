@@ -123,13 +123,30 @@ class ModParser:
         print("Done obtaining IDs.")
         return data
 
+    def fix_chrome_headless_ua(self):
+        # Launch headless chrome and get its user agent
+        # Then chagne HeadlessChrome in the UA to Chrome so this is not detected as headless chrome
+        opts = webdriver.ChromeOptions()
+        opts.add_argument("--headless")
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+        user_agent: str = driver.execute_script("return navigator.userAgent;")
+        driver.quit()
+        return user_agent.replace("HeadlessChrome", "Chrome")
+
     def __make_driver(self, headless: bool) -> webdriver.Remote:
         if self.browser == Browser.Chrome:
+            chrome_opts = webdriver.ChromeOptions()
             if headless:
-                print("WARNING: ********************************************************************")
-                print("WARNING: NOT USING HEADLESS MODE WITH CHROME AS IT PREVENTS FILE DOWNLOADS!!!")
-                print("WARNING: ********************************************************************")
-            return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+                chrome_opts.add_argument("--safebrowsing-disable-download-protection")
+                chrome_opts.add_argument("--headless")
+                chrome_opts.add_argument("--disable-gpu")
+                chrome_opts.add_argument("--no-sandbox")
+                chrome_opts.add_argument("--disable-dev-shm-usage")
+                chrome_opts.add_argument("user-agent=\"{0}\"".format(self.fix_chrome_headless_ua()))
+            driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
+            if headless:
+                driver.set_window_size(800, 600)
+            return driver
         elif self.browser == Browser.Firefox:
             firefox_opts = webdriver.FirefoxOptions()
             firefox_opts.headless = headless
