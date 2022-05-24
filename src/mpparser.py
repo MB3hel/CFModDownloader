@@ -102,7 +102,6 @@ class ModParser:
 
                 # Page is considered loaded when text "Project ID" is found
                 try:
-                    print(driver.page_source)
                     if driver.page_source.find("Project ID") != -1:
                         try:
                             soup = BeautifulSoup(driver.page_source, "lxml")
