@@ -102,6 +102,7 @@ class ModParser:
 
                 # Page is considered loaded when text "Project ID" is found
                 try:
+                    print(driver.page_source)
                     if driver.page_source.find("Project ID") != -1:
                         try:
                             soup = BeautifulSoup(driver.page_source, "lxml")
@@ -136,16 +137,20 @@ class ModParser:
     def __make_driver(self, headless: bool) -> webdriver.Remote:
         if self.browser == Browser.Chrome:
             chrome_opts = webdriver.ChromeOptions()
+            # if headless:
+            #     chrome_opts.add_argument("--safebrowsing-disable-download-protection")
+            #     chrome_opts.add_argument("--headless")
+            #     chrome_opts.add_argument("--disable-gpu")
+            #     chrome_opts.add_argument("--no-sandbox")
+            #     chrome_opts.add_argument("--disable-dev-shm-usage")
+            #     chrome_opts.add_argument("user-agent=\"{0}\"".format(self.fix_chrome_headless_ua()))
             if headless:
-                chrome_opts.add_argument("--safebrowsing-disable-download-protection")
-                chrome_opts.add_argument("--headless")
-                chrome_opts.add_argument("--disable-gpu")
-                chrome_opts.add_argument("--no-sandbox")
-                chrome_opts.add_argument("--disable-dev-shm-usage")
-                chrome_opts.add_argument("user-agent=\"{0}\"".format(self.fix_chrome_headless_ua()))
+                print("WARNING: ********************************************************************")
+                print("WARNING: NOT USING HEADLESS MODE WITH CHROME AS IT DOES NOT WORK!!!          ")
+                print("WARNING: ********************************************************************")
             driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
-            if headless:
-                driver.set_window_size(800, 600)
+            # if headless:
+            #     driver.set_window_size(800, 600)
             return driver
         elif self.browser == Browser.Firefox:
             firefox_opts = webdriver.FirefoxOptions()
