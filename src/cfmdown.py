@@ -52,6 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", dest="mods", metavar="mod", default=[], action="append", type=str, help="Download a given mod in the form url:file_id")
     parser.add_argument("-f", dest="files", metavar="file", default=[], action="append", type=str, help="Download mods listed in the given file in the form url:file_id")
     parser.add_argument("-t", dest="tabs", metavar="tabs", default=12, type=int, help="Maximum number of tabs (concurrent mod downloads) at a time. 0 for unlimited. Default 12")
+    parser.add_argument("-n", dest="headless", action='store_true', help="Launch the browser in headless mode (do not show the browser). Only works with firefox.")
     args = parser.parse_args()
     if len(args.mods) == 0 and len(args.files) == 0:
         parser.error("No mods provided. Use either -m or -f when invoking.")

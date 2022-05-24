@@ -85,6 +85,7 @@ class ModDownloader:
         # Create temp dir to store downloaded files in
         print("Creating temp download directory...")
         with tempfile.TemporaryDirectory() as tempdir:
+            print("Downloading to temp directory '{0}'".format(tempdir))
             # Construct properly formatted download path for use with browser options
             # Chrome on windows requires backslash and capitalized drive letter
             dl_path = str(Path(tempdir).absolute()).replace("/", os.path.sep).replace("\\", os.path.sep)
@@ -93,7 +94,7 @@ class ModDownloader:
 
             # Create driver for selected browser
             print("Launching browser...")
-            driver = self.__make_driver(dl_path)
+            driver = self.__make_driver(dl_path, True)
 
             # For each set of mods (up to self.max_tabs mods per set)
             count = 1
@@ -107,7 +108,9 @@ class ModDownloader:
                     count = count + 1
                     if mod != mods[0]:
                         driver.switch_to.new_window('tab')
-                    driver.execute_script("window.open('{0}/download/{1}', '_self');".format(mod.base_url, mod.file_id))
+                    url = '{0}/download/{1}'.format(mod.base_url, mod.file_id)
+                    driver.execute_script("window.open('{0}', '_self');".format(url))
+
                 
                 # Wait for all downloads finish
                 # Wait for filecount to increase by the same as the number of mods (excluding temp files)
@@ -189,7 +192,17 @@ class ModDownloader:
                 result.append(self.mods[i:i+self.max_tabs])
             return result
 
-    def __make_driver(self, dl_path: str) -> webdriver.Remote:
+    def fix_chrome_headless_ua(self):
+        # Launch headless chrome and get its user agent
+        # Then chagne HeadlessChrome in the UA to Chrome so this is not detected as headless chrome
+        opts = webdriver.ChromeOptions()
+        opts.add_argument("--headless")
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=opts)
+        user_agent: str = driver.execute_script("return navigator.userAgent;")
+        driver.quit()
+        return user_agent.replace("HeadlessChrome", "Chrome")
+
+    def __make_driver(self, dl_path: str, headless: bool) -> webdriver.Remote:
         if self.browser == Browser.Chrome:
             # Chrome options to download files to the specified directory without prompting the user
             chrome_opts = webdriver.ChromeOptions()
@@ -199,11 +212,29 @@ class ModDownloader:
                 "download.directory_upgrade": True,
                 "safebrowsing.enabled": True
             })
-            chrome_opts.add_argument("--safebrowsing-disable-download-protection")
-            return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
+            if headless:
+                print("WARNING: ********************************************************************")
+                print("WARNING: NOT USING HEADLESS MODE WITH CHROME AS IT PREVENTS FILE DOWNLOADS!!!")
+                print("WARNING: ********************************************************************")
+            # if headless:
+            #     chrome_opts.add_argument("--safebrowsing-disable-download-protection")
+            #     chrome_opts.add_argument("--headless")
+            #     chrome_opts.add_argument("--disable-gpu")
+            #     chrome_opts.add_argument("--no-sandbox")
+            #     chrome_opts.add_argument("--disable-dev-shm-usage")
+            #     chrome_opts.add_argument("user-agent=\"{0}\"".format(self.fix_chrome_headless_ua()))
+            #     chrome_opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+            #     chrome_opts.add_experimental_option('useAutomationExtension', False)
+            driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_opts)
+            # if headless:
+            #     driver.set_window_size(800, 600)
+            #     params = {'behavior': 'allow', 'downloadPath': dl_path}
+            #     driver.execute_cdp_cmd('Page.setDownloadBehavior', params)
+            return driver
         elif self.browser == Browser.Firefox:
             # Firefox options to download files to the specified directory without prompting the user
             firefox_opts = webdriver.FirefoxOptions()
+            firefox_opts.headless = headless
             firefox_opts.set_preference("browser.download.folderList", 2)
             firefox_opts.set_preference("browser.download.manager.showWhenStarting", False)
             firefox_opts.set_preference("browser.download.dir", dl_path)
